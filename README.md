@@ -124,6 +124,8 @@ pip install -r requirements.txt
 
 # Run the application
 python app.py
+```
+
 
 ### My ELUSOC 2026 Admin Badges!
 
@@ -131,4 +133,4 @@ python app.py
 
 </a>
 
-```
+

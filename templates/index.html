@@ -2447,27 +2447,35 @@
 
         const assetList = document.getElementById('assetList');
         assetList.innerHTML = '';
-        data.assets.forEach((item, idx) => {
-          assetList.innerHTML += `
-            <tr style="border-bottom: 1px solid var(--border);">
-              <td style="padding: 8px;">${item.name}</td>
-              <td style="padding: 8px; text-align: right;">₹${fmtNum(item.amount)}</td>
-              <td style="padding: 8px; text-align: center;"><button class="btn btn-ghost" style="padding: 4px 8px; font-size: 10px;" onclick="deleteNWItem('asset', ${idx})">✖</button></td>
-            </tr>
-          `;
-        });
+        if (data.assets.length === 0) {
+          assetList.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--muted); font-style: italic;">No assets added yet</td></tr>';
+        } else {
+          data.assets.forEach((item, idx) => {
+            assetList.innerHTML += `
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 8px;">${item.name}</td>
+                <td style="padding: 8px; text-align: right;">₹${fmtNum(item.amount)}</td>
+                <td style="padding: 8px; text-align: center;"><button class="btn btn-ghost" style="padding: 4px 8px; font-size: 10px;" onclick="deleteNWItem('asset', ${idx})">✖</button></td>
+              </tr>
+            `;
+          });
+        }
 
         const liabList = document.getElementById('liabList');
         liabList.innerHTML = '';
-        data.liabilities.forEach((item, idx) => {
-          liabList.innerHTML += `
-            <tr style="border-bottom: 1px solid var(--border);">
-              <td style="padding: 8px;">${item.name}</td>
-              <td style="padding: 8px; text-align: right;">₹${fmtNum(item.amount)}</td>
-              <td style="padding: 8px; text-align: center;"><button class="btn btn-ghost" style="padding: 4px 8px; font-size: 10px;" onclick="deleteNWItem('liability', ${idx})">✖</button></td>
-            </tr>
-          `;
-        });
+        if (data.liabilities.length === 0) {
+          liabList.innerHTML = '<tr><td colspan="3" style="text-align: center; padding: 20px; color: var(--muted); font-style: italic;">No liabilities added yet</td></tr>';
+        } else {
+          data.liabilities.forEach((item, idx) => {
+            liabList.innerHTML += `
+              <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 8px;">${item.name}</td>
+                <td style="padding: 8px; text-align: right;">₹${fmtNum(item.amount)}</td>
+                <td style="padding: 8px; text-align: center;"><button class="btn btn-ghost" style="padding: 4px 8px; font-size: 10px;" onclick="deleteNWItem('liability', ${idx})">✖</button></td>
+              </tr>
+            `;
+          });
+        }
       } catch (e) {
         console.error('Error loading net worth:', e);
       }

@@ -155,16 +155,22 @@ def add_expense():
         data = request.json
         if not data or "category" not in data or "amount" not in data or "date" not in data:
             return jsonify({"error": "category, amount, and date are required"}), 400
+
+        print("RECEIVED:", data)   # ADD THIS
+
         expense = {
             "category": str(data["category"]).strip(),
             "amount": float(data["amount"]),
             "date": str(data["date"]).strip(),
         }
-        persistence.append_item("expenses", expense)
+        expense_data = persistence.append_item("expenses", expense)
+
+        print("ALL EXPENSES:", expense_data)   # ADD THIS
+
         return jsonify({"status": "success"})
     except Exception as e:
+        print("ERROR:", str(e))   # ADD THIS
         return jsonify({"error": str(e)}), 400
-
 
 @app.route("/calculate", methods=["GET"])
 def calculate():

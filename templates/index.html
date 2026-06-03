@@ -3235,6 +3235,13 @@ Add Savings
                           btn.innerHTML = "☀️ Light Mode";
                         }
                       }
+
+                      function toggleMobileMenu() {
+                        const sidebar = document.querySelector(".sidebar");
+                        const overlay = document.querySelector(".menu-overlay");
+                        sidebar.classList.toggle("open");
+                        overlay.classList.toggle("active");
+                      }
                       window.addEventListener("DOMContentLoaded", () => {
                         const savedTheme = localStorage.getItem("theme");
                         const btn = document.getElementById("themeToggle");
@@ -3245,8 +3252,6 @@ Add Savings
                       });
 
                     </script>
-}
-  </script>
 </body>
 
 </html>

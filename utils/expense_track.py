@@ -2,9 +2,17 @@ from groq import Groq
 import os
 
 
+BUDGET_LIMITS = {
+    "Food": 5000.0,
+    "Shopping": 10000.0,
+    "Entertainment": 3000.0,
+    "Utilities": 6000.0,
+    "Other": 4000.0
+}
+
 def calculate_expense(expenses):
     if not expenses:
-        return {"Total": 0, "Average": 0, "By Category":{}}
+        return {"Total": 0, "Average": 0, "By Category": {}, "Budget Limits": BUDGET_LIMITS, "Status": {}}
 
     total = sum([e["amount"]  for e in expenses])
     average = total / len(expenses) 
@@ -13,7 +21,23 @@ def calculate_expense(expenses):
     for e in expenses:
         by_category[e["category"]] = (by_category.get(e["category"],0) + e["amount"])
     
-    return {"Total": total, "Average": average, "By Category":by_category}
+    status = {}
+    for cat, spent in by_category.items():
+        limit = BUDGET_LIMITS.get(cat, 5000.0) # Default limit if custom category
+        status[cat] = {
+            "spent": spent,
+            "limit": limit,
+            "exceeded": spent > limit,
+            "percentage": round((spent / limit) * 100, 2) if limit > 0 else 100.0
+        }
+        
+    return {
+        "Total": total,
+        "Average": average,
+        "By Category": by_category,
+        "Budget Limits": BUDGET_LIMITS,
+        "Status": status
+    }
     
 def insights(client, expenses):
 

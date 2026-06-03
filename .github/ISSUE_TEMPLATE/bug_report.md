@@ -1,6 +1,6 @@
 ---
 name: Bug Report
-about: Report a bug or broken behavior in LecturePulse
+about: Report a bug or broken behavior in AI-Money-Mentor
 title: "[Bug] "
 ---
 
@@ -28,20 +28,24 @@ title: "[Bug] "
 
 ## Environment
 
-- **Browser**: <!-- e.g. Chrome 125, Firefox 127 -->
-- **OS**: <!-- e.g. Windows 11, macOS Sonoma -->
-- **Node.js version**: <!-- e.g. 20.x -->
+- **Browser**: <!-- e.g. Chrome, Firefox, Safari -->
+- **OS**: <!-- e.g. Windows 11, macOS, Linux -->
+- **Python version**: <!-- e.g. 3.11 -->
 
 ## Affected Page / Component
 
 <!-- Which part of the app is affected? -->
 
-- [ ] Landing
-- [ ] Login
 - [ ] Dashboard
-- [ ] Student Feedback
-- [ ] Analytics
-- [ ] Other: <!-- specify -->
+- [ ] AI Chat
+- [ ] Money Score
+- [ ] SIP Calc
+- [ ] Stock Check
+- [ ] Tax Planner
+- [ ] PDF Parser
+- [ ] Multi Agent
+- [ ] Expense Track
+- [ ] Net Worth
 
 ## Additional Context
 

@@ -1446,13 +1446,21 @@ pointer;
   <!-- ══════════ SIDEBAR ══════════ -->
   <div class="sidebar">
     <div class="logo">₹ Money Mentor</div>
-    <button
-       class="btn btn-ghost"
-       id="themeToggle"
-       onclick="toggleTheme()"
-       style="margin-bottom:15px;width:100%;">
-       ☀️ Light Mode
-    </button>
+    <div style="margin-bottom:15px; width:100%; display:flex; gap:8px;">
+      <button
+         class="btn btn-ghost"
+         id="themeToggle"
+         onclick="toggleTheme()"
+         style="flex: 1.2; padding: 7px 12px; min-height: 38px; font-size: 12px;">
+         ☀️ Light
+      </button>
+      <select id="currencySelector" onchange="changeCurrency()" style="flex: 1.8; padding: 7px 12px; border-radius: 999px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08); color: var(--text); font-family: inherit; font-size: 13px; font-weight: 700; outline: none; cursor: pointer; height: 38px;">
+        <option value="INR" selected>₹ INR</option>
+        <option value="USD">$ USD</option>
+        <option value="EUR">€ EUR</option>
+        <option value="GBP">£ GBP</option>
+      </select>
+    </div>
 
     <div class="nav-item active" data-page="dashboard"><span class="icon">🏠</span> Dashboard</div>
     <div class="nav-item" data-page="chat"><span class="icon">🤖</span> AI Chat</div>
@@ -3224,6 +3232,41 @@ Add Savings
                         originalShowPage(name, e);
                         if (name === 'networth') loadNetWorth();
                       };
+
+                      window.activeCurrencySymbol = localStorage.getItem("preferredCurrencySymbol") || "₹";
+                      
+                      function changeCurrency() {
+                        const sel = document.getElementById("currencySelector");
+                        const symbol = sel.value === "USD" ? "$" : sel.value === "EUR" ? "€" : sel.value === "GBP" ? "£" : "₹";
+                        window.activeCurrencySymbol = symbol;
+                        localStorage.setItem("preferredCurrency", sel.value);
+                        localStorage.setItem("preferredCurrencySymbol", symbol);
+                        updateCurrencySymbolDisplay();
+                      }
+
+                      function updateCurrencySymbolDisplay() {
+                        const elements = document.querySelectorAll(".currency-symbol");
+                        elements.forEach(el => {
+                          el.textContent = window.activeCurrencySymbol;
+                        });
+                        
+                        const inputs = document.querySelectorAll("[placeholder*='(₹)']");
+                        inputs.forEach(input => {
+                          input.placeholder = input.placeholder.replace(/₹|\$|€|£/g, window.activeCurrencySymbol);
+                        });
+                        
+                        const labelElements = document.querySelectorAll("label, .stat-label, .card-title, .result-box, #sipAmtLbl, #sipOut, #nwAssets, #nwLiabilities, #nwTotal");
+                        labelElements.forEach(el => {
+                          if (el.id !== "sipAmtLbl" && el.id !== "sipOut" && el.id !== "nwAssets" && el.id !== "nwLiabilities" && el.id !== "nwTotal") {
+                            el.childNodes.forEach(child => {
+                              if (child.nodeType === Node.TEXT_NODE) {
+                                child.textContent = child.textContent.replace(/₹/g, window.activeCurrencySymbol);
+                              }
+                            });
+                          }
+                        });
+                      }
+
                       function toggleTheme() {
                         document.body.classList.toggle("light-theme");
                         const btn = document.getElementById("themeToggle");
@@ -3235,6 +3278,7 @@ Add Savings
                           btn.innerHTML = "☀️ Light Mode";
                         }
                       }
+
                       window.addEventListener("DOMContentLoaded", () => {
                         const savedTheme = localStorage.getItem("theme");
                         const btn = document.getElementById("themeToggle");
@@ -3242,11 +3286,20 @@ Add Savings
                           document.body.classList.add("light-theme");
                           btn.innerHTML = "🌙 Dark Mode";
                         }
+                        
+                        const preferredCurrency = localStorage.getItem("preferredCurrency");
+                        if (preferredCurrency) {
+                          const sel = document.getElementById("currencySelector");
+                          if (sel) {
+                            sel.value = preferredCurrency;
+                            window.activeCurrencySymbol = localStorage.getItem("preferredCurrencySymbol") || "₹";
+                          }
+                        }
+                        updateCurrencySymbolDisplay();
                       });
-
                     </script>
-}
-  </script>
+</body>
+</html>
 </body>
 
 </html>

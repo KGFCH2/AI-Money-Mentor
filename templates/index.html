@@ -10,6 +10,8 @@
     rel="stylesheet">
   <link rel="stylesheet" href="{{ url_for('static', filename='styles/styles.css') }}">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>  <!-- For Markdown parsing in AI responses -->
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.8/dist/purify.min.js"></script> <!-- For sanitizing AI responses -->
   <script src="{{ url_for('static', filename='scripts/script.js') }}" defer></script>
 </head>
 

@@ -146,15 +146,42 @@ function exportCSV() {
 }
 
 // Chat functions
+function appendMsg(boxId, role, text) {
+    const box = document.getElementById(boxId);
+
+    const d = document.createElement('div');
+    d.className = `msg ${role}`;
+
+    let content;
+
+    if (role === 'bot') {
+        content = DOMPurify.sanitize(
+            marked.parse(text || '')
+        );
+    } else {
+        content = text;
+    }
+
+    d.innerHTML = `
+        <div class="sender">
+            ${role === 'user' ? 'You' : 'AI Advisor'}
+        </div>
+        ${content}
+    `;
+
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+}
+
 async function dashSend() {
     const msg = document.getElementById('dashMsg').value;
     if (!msg) return;
     const chatDiv = document.getElementById('dashChat');
-    chatDiv.innerHTML += `<div class="msg user">${msg}</div>`;
+    appendMsg('dashChat', 'user', msg);
     document.getElementById('dashMsg').value = '';
     const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg }) });
     const data = await res.json();
-    chatDiv.innerHTML += `<div class="msg bot">${data.reply || 'Error'}</div>`;
+    appendMsg('dashChat', 'bot', data.reply);
     chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 
@@ -162,11 +189,11 @@ async function chatSend() {
     const msg = document.getElementById('chatInput').value;
     if (!msg) return;
     const chatDiv = document.getElementById('chatMessages');
-    chatDiv.innerHTML += `<div class="msg user">${msg}</div>`;
+    appendMsg('chatMessages', 'user', msg);
     document.getElementById('chatInput').value = '';
     const res = await fetch('/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: msg }) });
     const data = await res.json();
-    chatDiv.innerHTML += `<div class="msg bot">${data.reply || 'Error'}</div>`;
+    appendMsg('chatMessages', 'bot', data.reply);
     chatDiv.scrollTop = chatDiv.scrollHeight;
 }
 

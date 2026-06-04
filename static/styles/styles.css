@@ -293,6 +293,9 @@ select:focus {
     border-radius: 18px;
     font-size: 13px;
     line-height: 1.6;
+    white-space: normal;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
 .msg.user {
@@ -305,6 +308,34 @@ select:focus {
     background: rgba(16, 24, 41, 0.94);
     border: 1px solid var(--border);
     align-self: flex-start;
+}
+
+.msg p:first-child {
+    margin-top: 0;
+}
+
+.msg p:last-child {
+    margin-bottom: 0;
+}
+
+.msg p {
+    margin: 12px 0;
+}
+
+.msg ul,
+.msg ol {
+    margin: 12px 0;
+    padding-left: 20px;
+}
+
+.msg li {
+    margin-bottom: 8px;
+}
+
+.msg h1,
+.msg h2,
+.msg h3 {
+    margin: 16px 0 10px;
 }
 
 .chat-input-row {

@@ -1,9 +1,14 @@
 import yfinance as yf
+import re
 
 def get_stock_price(symbol):
     try:
         # Clean input
         symbol = symbol.strip().upper()
+        
+        # Security sanitization check: only allow alphanumeric, dots, hyphens, and underscores
+        if not symbol or not re.match(r"^[A-Z0-9.\-_]+$", symbol):
+            return {"error": "Invalid stock symbol format"}
 
         # Try finding as is first (especially for global stocks like AAPL, MSFT)
         stock = yf.Ticker(symbol)
@@ -49,11 +54,26 @@ def get_stock_price(symbol):
         except Exception as info_err:
             print(f"Info fetch failed for {symbol}: {info_err}")
 
+        # Get latest 5 news items
+        news_items = []
+        try:
+            raw_news = stock.news
+            if raw_news:
+                for item in raw_news[:5]:
+                    news_items.append({
+                        "title": item.get("title", ""),
+                        "publisher": item.get("publisher", ""),
+                        "link": item.get("link", "")
+                    })
+        except Exception as news_err:
+            print(f"News fetch failed for {symbol}: {news_err}")
+
         return {
             "symbol": symbol,
             "price": round(price, 2),
             "history": history_data,
-            "metrics": metrics
+            "metrics": metrics,
+            "news": news_items
         }
 
     except Exception as e:

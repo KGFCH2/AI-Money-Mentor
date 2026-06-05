@@ -1208,7 +1208,7 @@ body.light-theme::before {
   .page-title {
     font-size: 18px;
   }
-}
+
 /* ===== GOAL TRACKER STYLING FIX ===== */
 
 #goalTracker {
@@ -3002,9 +3002,16 @@ try{
               `;
                             });
                           }
+                             } catch(error){
+            console.log(error);
+        }
+}
 
 loadExpenses();
+
 let goals = [];
+                          
+
 
 function addGoal(){
 
@@ -3155,6 +3162,7 @@ Add Savings
 </div>
 `;
 });
+}
 
                       // Update loadNetWorth when navigating to the page
                       const originalShowPage = showPage;
@@ -3182,9 +3190,77 @@ Add Savings
                         }
                       });
 
-                    </script>
+                   </script>
+
+ <script>
+
+async function chatSend() {
+
+    const input = document.getElementById("chatInput");
+    const messages = document.getElementById("chatMessages");
+    const welcome = document.getElementById("chatPageWelcome");
+
+    const text = input.value.trim();
+
+    if (!text) return;
+
+    welcome?.classList.add("hidden");
+
+    messages.innerHTML += `
+        <div class="msg user">
+            <div class="sender">YOU</div>
+            ${text}
+        </div>
+    `;
+
+    input.value = "";
+
+    try {
+
+        const res = await fetch("http://127.0.0.1:5000/chat", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: text
+            })
+        });
+
+        const data = await res.json();
+
+        messages.innerHTML += `
+            <div class="msg bot">
+                <div class="sender">AI</div>
+                ${data.reply}
+            </div>
+        `;
+
+    } catch (err) {
+
+        messages.innerHTML += `
+            <div class="msg bot">
+                <div class="sender">AI</div>
+                Backend not connected. /chat endpoint missing.
+            </div>
+        `;
+
+        console.log(err);
+    }
+
+    messages.scrollTop = messages.scrollHeight;
 }
-  </script>
+
+function chatQuick(text){
+
+    document.getElementById(
+        "chatInput"
+    ).value = text;
+
+    chatSend();
+}
+
+</script>
 </body>
 
 </html>

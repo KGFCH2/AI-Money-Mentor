@@ -106,13 +106,40 @@ def chat():
         msg = request.json.get("message")
 
         res = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
-            messages=[
-                {"role": "system", "content": "You are a financial advisor for India."},
-                {"role": "user", "content": msg}
-            ]
-        )
+    model="llama-3.1-8b-instant",
+    messages=[
+        {
+            "role": "system",
+            "content": """
+You are an expert AI financial advisor for Indian users.
 
+Your job:
+- Help users manage money smartly
+- Teach budgeting, saving, and investing
+- Give simple, practical, real-life advice
+
+Response rules:
+- Always use structured format:
+
+Income / Situation Summary:
+- ...
+
+Budget Breakdown (if applicable):
+- Needs: 50%
+- Wants: 30%
+- Savings: 20%
+
+Advice:
+- Give clear steps
+- Keep it simple and actionable
+
+Tone:
+- Friendly, practical, and easy to understand
+"""
+        },
+        {"role": "user", "content": msg}
+    ]
+)
         return jsonify({
             "reply": res.choices[0].message.content
         })
@@ -335,3 +362,10 @@ def delete_item():
 if __name__ == "__main__":
     debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "yes")
     app.run(debug=debug_mode)
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route("/")
+def home():
+    return render_template("index.html")

@@ -168,10 +168,6 @@ def chat():
             model="llama-3.1-8b-instant",
             messages=messages
         )
-<<<<<<< HEAD
-=======
-
->>>>>>> upstream/main
         return jsonify({
             "reply": res.choices[0].message.content
         })
@@ -447,6 +443,134 @@ def delete_item():
         return jsonify({"status": "success"})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
+
+# Helper to check budget thresholds
+def run_threshold_checks(category, year_month=None):
+    if not year_month:
+        import datetime
+        year_month = datetime.datetime.now().strftime("%Y-%m")
+        
+    limit = BudgetLimit.query.filter_by(category=category).first()
+    if not limit or limit.limit_amount <= 0:
+        return []
+        
+    expenses = Expense.query.filter(
+        Expense.category == category,
+        Expense.date.like(f"{year_month}%")
+    ).all()
+    
+    total_spent = sum(e.amount for e in expenses)
+    pct = total_spent / limit.limit_amount
+    
+    triggered = []
+    for threshold in [100, 90, 80]:
+        target = threshold / 100.0
+        if pct >= target:
+            exists = BudgetAlert.query.filter_by(
+                category=category,
+                year_month=year_month,
+                threshold=threshold
+            ).first()
+            if not exists:
+                alert = BudgetAlert(
+                    category=category,
+                    year_month=year_month,
+                    threshold=threshold
+                )
+                db.session.add(alert)
+                triggered.append(threshold)
+                print(
+                    f"\n[EMAIL ALERT] To: user@example.com\n"
+                    f"Subject: Budget Alert: {category} spending reached {threshold}%\n"
+                    f"Body: You have spent ₹{total_spent:.2f} of your ₹{limit.limit_amount:.2f} limit in category '{category}'.\n",
+                    file=sys.stderr
+                )
+    if triggered:
+        db.session.commit()
+    return triggered
+
+
+# ---------------- SMART BUDGET ALERTS ----------------
+
+@app.route("/budget/limits", methods=["GET", "POST"])
+def budget_limits():
+    if request.method == "POST":
+        try:
+            data = request.json
+            category = data["category"]
+            limit_amount = float(data["limit_amount"])
+            
+            limit = BudgetLimit.query.filter_by(category=category).first()
+            if limit:
+                limit.limit_amount = limit_amount
+            else:
+                limit = BudgetLimit(category=category, limit_amount=limit_amount)
+                db.session.add(limit)
+            db.session.commit()
+            return jsonify({"status": "success"})
+        except Exception as e:
+            return jsonify({"error": str(e)}), 400
+    else:
+        limits = BudgetLimit.query.order_by(BudgetLimit.category).all()
+        return jsonify([l.to_dict() for l in limits])
+
+@app.route("/budget/status", methods=["GET"])
+def budget_status():
+    import datetime
+    year_month = request.args.get("month", datetime.datetime.now().strftime("%Y-%m"))
+    
+    limits = BudgetLimit.query.all()
+    limits_dict = {l.category: l.limit_amount for l in limits}
+    
+    expenses = Expense.query.filter(Expense.date.like(f"{year_month}%")).all()
+    
+    spent_by_category = {}
+    for e in expenses:
+        spent_by_category[e.category] = spent_by_category.get(e.category, 0.0) + e.amount
+        
+    status_list = []
+    all_categories = set(limits_dict.keys()) | set(spent_by_category.keys())
+    
+    for cat in sorted(all_categories):
+        lim = limits_dict.get(cat, 0.0)
+        spent = spent_by_category.get(cat, 0.0)
+        pct = (spent / lim * 100) if lim > 0 else 0.0
+        status_list.append({
+            "category": cat,
+            "limit_amount": lim,
+            "spent": spent,
+            "percentage": round(pct, 2)
+        })
+        
+    return jsonify({
+        "month": year_month,
+        "categories": status_list,
+        "total_budgeted": sum(limits_dict.values()),
+        "total_spent": sum(spent_by_category.values())
+    })
+
+@app.route("/budget/alerts", methods=["GET"])
+def budget_alerts():
+    alerts = BudgetAlert.query.order_by(BudgetAlert.triggered_at.desc()).limit(10).all()
+    return jsonify([a.to_dict() for a in alerts])
+
+
+# ---------------- SCHEDULER ----------------
+from apscheduler.schedulers.background import BackgroundScheduler
+
+def check_all_budgets_job():
+    with app.app_context():
+        import datetime
+        ym = datetime.datetime.now().strftime("%Y-%m")
+        limits = BudgetLimit.query.all()
+        for limit in limits:
+            run_threshold_checks(limit.category, ym)
+
+if not app.debug or os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+    scheduler = BackgroundScheduler()
+    scheduler.add_job(check_all_budgets_job, 'interval', days=1)
+    scheduler.start()
 
 
 # ---------------- RUN ----------------

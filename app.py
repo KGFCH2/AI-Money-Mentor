@@ -90,6 +90,28 @@ def health_check():
     return jsonify({"status": "ok", "service": "AI Money Mentor"}), 200
 
 
+# ---------------- AI STATUS (Issue #218) ----------------
+@app.route("/api/status", methods=["GET"])
+def ai_status():
+    """
+    Reports whether the Groq AI client is available.
+    The frontend can call this on page load to show/hide AI-dependent UI
+    and display an informative offline banner instead of a confusing error.
+    """
+    if client is not None:
+        return jsonify({
+            "ai_online": True,
+            "message": "AI Money Mentor is online and ready."
+        })
+    return jsonify({
+        "ai_online": False,
+        "message": (
+            "AI features are unavailable — GROQ_API_KEY is not configured. "
+            "Set GROQ_API_KEY in your .env file to enable AI features."
+        )
+    })
+
+
 # ---------------- ERROR HANDLERS ----------------
 @app.errorhandler(400)
 def bad_request(error):

@@ -112,46 +112,10 @@ def chat():
         messages.append({"role": "user", "content": msg})
 
         res = client.chat.completions.create(
-
-    model="llama-3.1-8b-instant",
-    messages=[
-        {
-            "role": "system",
-            "content": """
-You are an expert AI financial advisor for Indian users.
-
             model="llama-3.1-8b-instant",
             messages=messages
         )
 
-
-Your job:
-- Help users manage money smartly
-- Teach budgeting, saving, and investing
-- Give simple, practical, real-life advice
-
-Response rules:
-- Always use structured format:
-
-Income / Situation Summary:
-- ...
-
-Budget Breakdown (if applicable):
-- Needs: 50%
-- Wants: 30%
-- Savings: 20%
-
-Advice:
-- Give clear steps
-- Keep it simple and actionable
-
-Tone:
-- Friendly, practical, and easy to understand
-"""
-        },
-        {"role": "user", "content": msg}
-    ]
-)
         return jsonify({
             "reply": res.choices[0].message.content
         })

@@ -106,3 +106,43 @@ class TestChatContext:
         assert len(messages) == 2
         assert messages[0]["role"] == "system"
         assert messages[-1] == {"role": "user", "content": "hi"}
+
+    def test_followup_question_includes_prior_turn_as_frontend_would_send_it(self, chat_client):
+        """End-to-end: a second turn carries the first turn's exchange in `history`,
+        exactly as templates/chat.html's chatHistory does, and that full context
+        reaches Groq so a follow-up like "How do I start one?" can be resolved."""
+        client, mock_client = chat_client
+
+        def make_response(text):
+            choice = MagicMock()
+            choice.message.content = text
+            response = MagicMock()
+            response.choices = [choice]
+            return response
+
+        mock_client.chat.completions.create.side_effect = [
+            make_response("SIP stands for Systematic Investment Plan."),
+            make_response("Pick a fund and set up a monthly auto-debit."),
+        ]
+
+        # Turn 1: no history yet
+        res1 = client.post("/chat", json={"message": "What is SIP?", "history": []})
+        assert res1.status_code == 200
+        reply1 = res1.get_json()["reply"]
+        assert reply1 == "SIP stands for Systematic Investment Plan."
+
+        # Frontend appends both turns to chatHistory, then sends it on the next call
+        history = [
+            {"role": "user", "content": "What is SIP?"},
+            {"role": "assistant", "content": reply1},
+        ]
+        res2 = client.post("/chat", json={"message": "How do I start one?", "history": history})
+        assert res2.status_code == 200
+        assert res2.get_json()["reply"] == "Pick a fund and set up a monthly auto-debit."
+
+        # The second Groq call must include the first turn's full exchange
+        messages = _sent_messages(mock_client)
+        assert messages[0]["role"] == "system"
+        assert messages[1] == {"role": "user", "content": "What is SIP?"}
+        assert messages[2] == {"role": "assistant", "content": "SIP stands for Systematic Investment Plan."}
+        assert messages[-1] == {"role": "user", "content": "How do I start one?"}
